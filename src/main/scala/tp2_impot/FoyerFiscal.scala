@@ -4,13 +4,16 @@ sealed trait FoyerFiscal:
   def revenuTotal: Double
   def nombreParts: Double
 
+// Partie 6 
+sealed trait FoyerSansEnfants extends FoyerFiscal
+  
 case class Celibataire(nom: String, revenuTotal: Double)
-  extends FoyerFiscal
+  extends FoyerSansEnfants
     with CalculateurImpot:
   override def nombreParts: Double = 1
 
 case class Couple(p1: Celibataire, p2: Celibataire)
-  extends FoyerFiscal
+  extends FoyerSansEnfants
     with CalculateurImpot:
   // Constructeur additionnel
   def this(nom1: String, nom2: String, revenu1: Double, revenu2: Double) =
@@ -20,7 +23,7 @@ case class Couple(p1: Celibataire, p2: Celibataire)
 
   override def revenuTotal: Double = p1.revenuTotal + p2.revenuTotal
 
-case class FoyerAvecEnfants(foyerParent: FoyerFiscal, nombreEnfants: Int)
+case class FoyerAvecEnfants(foyerParent: FoyerSansEnfants, nombreEnfants: Int)
   extends FoyerFiscal
     with CalculateurImpot:
   override def revenuTotal: Double = foyerParent.revenuTotal

@@ -7,6 +7,10 @@ def main(): Unit =
   testCalculProgressif()
   testFoyerEnfants()
 
+  val celib = Celibataire("Alice", 45000.0)
+  // test Partie 6 val foyerEtrange = FoyerAvecEnfants(FoyerAvecEnfants(celib, 2), 3)
+  
+
 def testCelibataire(): Unit =
   val pierre = Celibataire("Pierre Dupont", 35000.0)
   println(s"${pierre.nom}: ${pierre.revenuTotal}€, ${pierre.nombreParts} parts")
