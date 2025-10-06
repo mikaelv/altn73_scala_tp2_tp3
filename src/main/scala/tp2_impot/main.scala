@@ -1,60 +1,13 @@
 package tp2_impot
 
-import CalculateurImpot.{Tranche1, Tranche2, Tranche3, Tranche4}
-
-sealed trait FoyerFiscal:
-  def revenuTotal: Double
-  def nombreParts: Double
-
-trait CalculateurImpot:
-  // Méthodes abstraites que les classes doivent fournir
-  def revenuTotal: Double
-
-  def nombreParts: Double
-
-  // Méthodes concrètes qui utilisent les méthodes abstraites
-  def calculerQuotientFamilial(): Double =
-    if nombreParts > 0 then revenuTotal / nombreParts else 0.0
-
-  def calculerTauxEffectif(impot: Double): Double =
-    if revenuTotal > 0 then (impot / revenuTotal) * 100 else 0.0
-
-  def calculerImpotProgressif(): Double =
-    calculerQuotientFamilial() match
-      case q if q < Tranche1 => 0
-      case q if q < Tranche2 => (q - Tranche1) * .11
-      case q if q < Tranche3 =>
-        (q - Tranche2) * .30 + (Tranche2 - Tranche1) * .11
-      case q if q < Tranche4 =>
-        (q - Tranche3) * .41 + (Tranche3 - Tranche2) * .30 + (Tranche2 - Tranche1) * .11
-      case q =>
-        (q - Tranche4) * .45 + (Tranche4 - Tranche3) * .41 + (Tranche3 - Tranche2) * .30 + (Tranche2 - Tranche1) * .11
-
-object CalculateurImpot:
-  val Tranche1 = 11498
-  val Tranche2 = 29316
-  val Tranche3 = 83824
-  val Tranche4 = 180295
-
-  // V2 : récursion
-  def calculerImpotProgressif(revenuParPart: Double): Double =
-    revenuParPart match
-      case q if q < Tranche1 => 0
-      case q if q < Tranche2 => (q - Tranche1) * .11
-      case q if q < Tranche3 =>
-        (q - Tranche2) * .30 + calculerImpotProgressif(Tranche2)
-      case q if q < Tranche4 =>
-        (q - Tranche3) * .41 + calculerImpotProgressif(Tranche3)
-      case q => (q - Tranche4) * .45 + calculerImpotProgressif(Tranche4)
-
-case class Celibataire(nom: String, revenuTotal: Double)
-    extends FoyerFiscal
-    with CalculateurImpot:
-  override def nombreParts: Double = 1
-  
 
 @main
 def main(): Unit =
+  testCelibataire()
+  testCalculProgressif()
+  testFoyerEnfants()
+
+def testCelibataire(): Unit =
   val pierre = Celibataire("Pierre Dupont", 35000.0)
   println(s"${pierre.nom}: ${pierre.revenuTotal}€, ${pierre.nombreParts} parts")
 // Sortie attendue: Pierre Dupont: 35000.0€, 1.0 parts
@@ -68,6 +21,9 @@ def main(): Unit =
   //   Quotient familial: 40000.00€
   //   Impôt à 15%: 6000.00€
   //   Taux effectif: 15.00%
+
+// PARTIE 4
+def testCalculProgressif(): Unit =
   val testeurs = List(
     Celibataire("Paul", 8000.0), // Exonéré
     Celibataire("Sophie", 20000.0), // Tranche 11%
@@ -80,4 +36,32 @@ def main(): Unit =
     val impot = foyer.calculerImpotProgressif()
     val taux = foyer.calculerTauxEffectif(impot)
     println(f"${foyer.nom}: ${impot}%.2f€ (${taux}%.2f%%)")
+  }
+  testFoyerEnfants()
+
+def testFoyerEnfants(): Unit =
+  val celibataireSeul = Celibataire("Alice", 45000.0)
+  val couple = new Couple("Bob", "Emma", 25000.0, 20000.0)
+  val celibataireAvecEnfants =
+    FoyerAvecEnfants(Celibataire("Carol", 45000.0), 2)
+  val coupleAvecEnfants = FoyerAvecEnfants(couple, 1)
+  val coupleAvec4Enfants = FoyerAvecEnfants(couple, 4)
+
+  val foyers =
+    List(celibataireSeul, couple, celibataireAvecEnfants, coupleAvecEnfants)
+
+  println("=== Comparaison des foyers ===")
+  foyers.foreach { foyer =>
+    val impot = foyer.calculerImpotProgressif()
+    val quotient = foyer.calculerQuotientFamilial()
+    val taux = foyer.calculerTauxEffectif(impot)
+
+    val nom = foyer.toString
+    println(f"$nom:")
+    println(f"  Revenu total: ${foyer.revenuTotal}%.2f€")
+    println(f"  Nombre de parts: ${foyer.nombreParts}%.1f")
+    println(f"  Quotient familial: ${quotient}%.2f€")
+    println(f"  Impôt: ${impot}%.2f€")
+    println(f"  Taux effectif: ${taux}%.2f%%")
+    println()
   }
