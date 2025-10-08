@@ -13,19 +13,9 @@ object CalculateurImpot:
   def calculerTauxEffectif(foyer: FoyerFiscal, impot: Double): Double =
     if foyer.revenuTotal > 0 then (impot / foyer.revenuTotal) * 100 else 0.0
 
-  def calculerImpotProgressif(foyer: FoyerFiscal): Double = {
-    val impotParPart = calculerQuotientFamilial(foyer) match
-      case q if q < Tranche1 => 0
-      case q if q < Tranche2 => (q - Tranche1) * .11
-      case q if q < Tranche3 =>
-        (q - Tranche2) * .30 + (Tranche2 - Tranche1) * .11
-      case q if q < Tranche4 =>
-        (q - Tranche3) * .41 + (Tranche3 - Tranche2) * .30 + (Tranche2 - Tranche1) * .11
-      case q =>
-        (q - Tranche4) * .45 + (Tranche4 - Tranche3) * .41 + (Tranche3 - Tranche2) * .30 + (Tranche2 - Tranche1) * .11
+  def calculerImpotProgressif(foyer: FoyerFiscal): Double =
+    val impotParPart = calculerImpotParPart(foyer.revenuTotal / foyer.nombreParts)
     impotParPart * foyer.nombreParts
-  }
-
 
   // V2 : récursion
   def calculerImpotParPart(revenuParPart: Double): Double =
@@ -33,9 +23,14 @@ object CalculateurImpot:
       case q if q < Tranche1 => 0
       case q if q < Tranche2 => (q - Tranche1) * .11
       case q if q < Tranche3 =>
-        (q - Tranche2) * .30 + calculerImpotParPart(Tranche2)
+        (q - Tranche2) * .30 + calculerImpotParPart(Tranche2 - 0.01)
       case q if q < Tranche4 =>
-        (q - Tranche3) * .41 + calculerImpotParPart(Tranche3)
-      case q => (q - Tranche4) * .45 + calculerImpotParPart(Tranche4)
+        (q - Tranche3) * .41 + calculerImpotParPart(Tranche3 - 0.01)
+      case q => (q - Tranche4) * .45 + calculerImpotParPart(Tranche4 - 0.01)
 
+  val result = for
+    x <- List(1, 2, 3)
+    y <- List(10, 20)
+  yield x + y
 
+  val result2 = List(1, 2, 3).flatMap(x => List(10, 20).map(y => x + y))
