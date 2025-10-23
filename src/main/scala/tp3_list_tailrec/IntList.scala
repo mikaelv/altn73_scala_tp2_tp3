@@ -26,7 +26,7 @@ sealed trait IntList:
       if element == head then true
       else tail.contains(element)
 
-  final def filter(predicate: Int => Boolean): IntList =
+  private final def filterReverse(predicate: Int => Boolean): IntList =
     @tailrec
     def loop(acc: IntList, element: IntList): IntList = element match
       case Empty => acc
@@ -37,6 +37,12 @@ sealed trait IntList:
           loop(acc, tail)
 
     loop(Empty, this)
+
+  final def reverse: IntList = filterReverse(_ => true)
+
+  final def filter(predicate: Int => Boolean): IntList =
+    filterReverse(predicate).reverse
+
 
 
   def mkString: String =
