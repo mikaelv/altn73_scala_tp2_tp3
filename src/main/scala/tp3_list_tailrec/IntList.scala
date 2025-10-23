@@ -44,7 +44,6 @@ sealed trait IntList:
     filterReverse(predicate).reverse
 
 
-
   def mkString: String =
     @tailrec
     def loop(acc: String, element: IntList): String = element match
@@ -56,6 +55,39 @@ sealed trait IntList:
           loop(acc + ", " + head, tail)
 
     loop("", this)
+
+
+  def double: IntList =
+    @tailrec
+    def loop(acc: IntList, element: IntList): IntList = element match
+      case Empty => acc
+      case Cons(head, tail) =>
+        loop(Cons(head * 2, acc), tail)
+
+    loop(Empty, this)
+
+
+  def map(transfo: Int => Int): IntList =
+    @tailrec
+    def loop(acc: IntList, element: IntList): IntList = element match
+      case Empty => acc
+      case Cons(head, tail) =>
+        loop(Cons(transfo(head), acc), tail)
+
+    loop(Empty, this).reverse
+
+
+  def sum: Int =
+    @tailrec
+    def loop(acc: Int, element: IntList): Int = element match
+      case Empty => acc
+      case Cons(head, tail) =>
+        loop(head + acc, tail)
+
+    loop(0, this)
+
+
+
 
 
 
